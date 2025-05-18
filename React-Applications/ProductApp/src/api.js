@@ -1,6 +1,6 @@
 export const fetchProducts = async () => {
-    const response = await fetch("https://dummyjson.com/products");
+    const response = await fetch("http://localhost:8080/productservice/getallproducts");
     if(!response.ok) throw new Error("Failed to fetch products");
-    const data = await response.json();
-    return data.products[0];
+    // const data = await response.json();
+    return response.json();
 };
