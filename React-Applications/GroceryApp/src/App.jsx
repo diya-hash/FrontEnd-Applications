@@ -1,31 +1,58 @@
-import { useState } from 'react'
-import './App.css'
-import { useEffect } from 'react'
-import { fetchGroceryProducts } from './api'
+import React, { useState, useEffect } from 'react';
+import { fetchGroceryProducts } from './api';
 
-function App() {
-  const [groceryProducts, setGrocery] = useState([])
+const GroceryList = () => {
+  const [groceryProducts, setGroceryProducts] = useState([]);
+  const [filterText, setFilterText] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
-  useEffect(()=>{
-    fetchGroceryProducts().then(setGrocery).catch(console.error);
-  }, [])
+  useEffect(() => {
+    fetchGroceryProducts()
+      .then(setGroceryProducts)
+      .catch((err) => console.error("Error fetching:", err));
+  }, []);
+
+  const filteredProducts = groceryProducts.filter(product => {
+    const matchesTitle = product.title.toLowerCase().includes(filterText.toLowerCase());
+    const matchesPrice = maxPrice === '' || product.price <= parseFloat(maxPrice);
+    return matchesTitle && matchesPrice;
+  });
+
   return (
     <div className='container'>
       <h1>Grocery Products</h1>
-      {groceryProducts.length > 0 ? (
+
+      {/* Filter Controls */}
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="Search by title"
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Max Price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+        />
+      </div>
+
+      {/* Product Display */}
+      {filteredProducts.length > 0 ? (
         <div className='grid'>
-          {groceryProducts.map((groceryProduct, index) => (
+          {filteredProducts.map((groceryProduct, index) => (
             <div key={index} className='card'>
               <h3>{groceryProduct.title}</h3>
-              <p>Price: {groceryProduct.price}</p>
+              <p>Price: ${groceryProduct.price.toFixed(2)}</p>
             </div>
           ))}
         </div>
-      ):(
-        <p>Loading...</p>
-      )} 
+      ) : (
+        <p>No products match the filter.</p>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default GroceryList;
